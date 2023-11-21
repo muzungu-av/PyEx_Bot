@@ -1,30 +1,27 @@
-import requests as req
-from file.example import _exam_resp
-
-_token = 'UokPEWhb7Gjf2hrqjRv_FlHOzWPSViPG'
-
-def get_request(path:str, limit:int = -1, token:str = None):
-    """делаем запрос"""
-    url = f'https://api.simplify-bots.com/items/{path}?limit={limit}'
-    if token:
-        url = url + f'&access_token={token}'
-    print(url)
-    return req.get(url)
+import asyncio
+import logging
+import config
+from aiogram import Bot, Dispatcher
+from aiogram.enums.parse_mode import ParseMode
+from aiogram.fsm.storage.memory import MemoryStorage
+from handlers import router
 
 
-def response_handler(resp = None):
-    """обрабатываем запрос"""
-    if _exam_resp["data"]:
-    # if resp:
-        for d in _exam_resp["data"]:
-            print( d)
-
-if __name__ == '__main__':
-    # настоящий запрос
-    # resp = get_request('routes_level_up_bot', 2, _token)
-    # response_handler(resp)
-
-    # заглушка
-    response_handler()
+async def main():
+    bot = Bot(token=config.BOT_TOKEN, parse_mode=ParseMode.HTML)
+    dp = Dispatcher(storage=MemoryStorage())
+    dp.include_router(router)
+    await bot.delete_webhook(drop_pending_updates=True)
+    await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())
 
 
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+    asyncio.run(main())
+
+# if __name__ == '__main__':
+#     # настоящий запрос
+#     resp = get_request('routes_level_up_bot', 2, db_token)
+#     response_handler(resp)
+#     # заглушка
+#     # response_handler()
